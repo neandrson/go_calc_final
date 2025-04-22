@@ -1,0 +1,27 @@
+package expression
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	"github.com/neandrson/go_calc_final/internal/models"
+)
+
+type Repository interface {
+	// CreateExpression создает expression
+	CreateExpression(ctx context.Context, value, idempotentKey, userId string) (*models.Expression, error)
+	// GetExpressions возвращает список expression
+	GetExpressions(ctx context.Context, userId string) ([]*models.Expression, error)
+	// GetExpressionById возвращает expression по id
+	GetExpressionById(ctx context.Context, id, userId string) (*models.Expression, error)
+	// GetExpressionByKey возвращает expression по ключу идемпотентности
+	GetExpressionByKey(ctx context.Context, key, userId string) (*models.Expression, error)
+	// UpdateExpression обновляет expression
+	UpdateExpression(context.Context, *models.Expression) error
+	// UpdateExpressionById обновляет результат expression по ID
+	UpdateExpressionById(ctx context.Context, id uuid.UUID, result float64) error
+	// DeleteExpressionById удаляет expression по ID
+	DeleteExpressionById(ctx context.Context, id uuid.UUID) error
+	// UpdateState обновляет статус expression по ID
+	UpdateState(ctx context.Context, id string, state models.ExpressionState) error
+}
