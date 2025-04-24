@@ -44,8 +44,7 @@ type App struct {
 }
 
 // New creates new gRPC server app.
-func New(
-	log *slog.Logger,
+func New(log *slog.Logger,
 	authService authService.IOAuth,
 	orchestratorService orchestrator.IOrchestrator,
 	appRepo app.Repository,
