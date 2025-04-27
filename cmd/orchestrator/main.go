@@ -41,6 +41,8 @@ func Start() {
 	cfg := config.MustLoad()
 	dataSourceName := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
 		cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.DbName, cfg.Postgres.User, cfg.Postgres.Password)
+	fmt.Println(dataSourceName)
+
 	expressionRepo, err := expression.NewPostgresRepository(dataSourceName)
 	if err != nil {
 		log.Fatalf("Failed to connect postgres: %v", err)
