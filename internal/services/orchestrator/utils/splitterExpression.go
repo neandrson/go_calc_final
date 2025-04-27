@@ -29,7 +29,7 @@ func SplitToSubtasks(ctx context.Context, expr *models.Expression, subExpression
 				err = x
 			default:
 				// Fallback err (per specs, error strings should be lowercase w/o punctuation
-				err = errors.New("unknown panic in splitter subtasks")
+				err = errors.New("неизвестная паника в подзадачах сплиттера")
 			}
 		}
 	}()
@@ -50,7 +50,7 @@ func SplitToSubtasks(ctx context.Context, expr *models.Expression, subExpression
 		if uuidRegex.MatchString(operand1) {
 			operand1Uid, err := uuid.Parse(operand1)
 			if err != nil {
-				log.Printf("error parse operand1")
+				log.Printf("ошибка разбора operand1")
 				return nil, err
 			}
 			subExpr.SubExpressionId1 = uuid.NullUUID{
@@ -67,7 +67,7 @@ func SplitToSubtasks(ctx context.Context, expr *models.Expression, subExpression
 		if uuidRegex.MatchString(operand2) {
 			operand2Uid, err := uuid.Parse(operand2)
 			if err != nil {
-				log.Printf("error parse operand2")
+				log.Printf("ошибка разбора operand2")
 				return nil, err
 			}
 			subExpr.SubExpressionId2 = uuid.NullUUID{
