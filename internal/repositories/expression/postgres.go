@@ -19,13 +19,13 @@ type PostgresRepository struct {
 func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 	db, err := sql.Open("pgx", dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
 	// Check the connection
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("не удалось выполнить пинг базы данных: %w", err)
 	}
 
 	return &PostgresRepository{db}, nil
@@ -44,7 +44,7 @@ func (r *PostgresRepository) CreateExpression(ctx context.Context, s, idempotenc
 		expression.UserId, expression.IdempotencyKey, expression.Value, expression.State).Scan(&id)
 
 	if err != nil {
-		return nil, fmt.Errorf("create expression failure %e", err)
+		return nil, fmt.Errorf("создание выражения неудачно %e", err)
 	}
 
 	expression.Id = id
@@ -54,7 +54,7 @@ func (r *PostgresRepository) CreateExpression(ctx context.Context, s, idempotenc
 func (r *PostgresRepository) GetExpressions(ctx context.Context, userId string) ([]*models.Expression, error) {
 	rows, err := r.db.QueryContext(ctx, "SELECT id, user_id, idempotency_key, value, state, result FROM expressions WHERE user_id=$1", userId)
 	if err != nil {
-		return nil, fmt.Errorf("get expression failure %e", err)
+		return nil, fmt.Errorf("получен сбой выражения %e", err)
 	}
 	defer rows.Close()
 
