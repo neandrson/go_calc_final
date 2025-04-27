@@ -18,13 +18,13 @@ type PostgresRepository struct {
 func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 	db, err := sql.Open("pgx", dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
 	// Check the connection
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("не удалось выполнить пинг базы данных: %w", err)
 	}
 
 	return &PostgresRepository{db}, nil
@@ -33,7 +33,7 @@ func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 func (p *PostgresRepository) Create(s string) error {
 	err := p.db.QueryRow("INSERT INTO agents (id) VALUES ($1)", s)
 	if err != nil {
-		return fmt.Errorf("create agent failure %v", err)
+		return fmt.Errorf("неудалось создать агента %v", err)
 	}
 	return nil
 }
@@ -41,7 +41,7 @@ func (p *PostgresRepository) Create(s string) error {
 func (p *PostgresRepository) IsExists(s string) (bool, error) {
 	exists, err := rowExists(p.db, "SELECT EXISTS(SELECT 1 FROM agents WHERE id = $1)", s)
 	if err != nil {
-		return false, fmt.Errorf("agent is exists failure%e", err)
+		return false, fmt.Errorf("ошибка существования агента %e", err)
 	}
 	return exists, nil
 }
@@ -69,7 +69,7 @@ func (p *PostgresRepository) CreateIfNotExistsAndUpdateHeartbeat(id string) erro
 func (p *PostgresRepository) GetAgents() ([]*models.Agent, error) {
 	rows, err := p.db.Query("SELECT id, heartbeat FROM agents")
 	if err != nil {
-		log.Printf("error get agents query")
+		log.Printf("ошибка получения запроса агентов")
 		return nil, err
 	}
 	defer rows.Close()
@@ -79,7 +79,7 @@ func (p *PostgresRepository) GetAgents() ([]*models.Agent, error) {
 		var timestamp time.Time
 		var agent models.Agent
 		if err := rows.Scan(&agent.Id, &timestamp); err != nil {
-			log.Printf("error scan agent")
+			log.Printf("ошибока сканирования агента")
 			return nil, err
 		}
 		agent.Heartbeat = timestamp.Unix()
@@ -98,7 +98,7 @@ func rowExists(db *sql.DB, query string, args ...interface{}) (bool, error) {
 	var exists bool
 	err := db.QueryRow(query, args...).Scan(&exists)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return false, fmt.Errorf("error checking if row exists: %v", err)
+		return false, fmt.Errorf("ошибка проверки существования строки: %v", err)
 	}
 	return exists, nil
 }
