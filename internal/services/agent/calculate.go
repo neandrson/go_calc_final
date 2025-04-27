@@ -19,7 +19,7 @@ func Calculate(expression *models.SubExpression, timeouts config.CalculationTime
 				err = x
 			default:
 				// Fallback err (per specs, error strings should be lowercase w/o punctuation
-				err = errors.New("unknown panic")
+				err = errors.New("неизвестная паника")
 			}
 		}
 	}()
@@ -35,12 +35,12 @@ func Calculate(expression *models.SubExpression, timeouts config.CalculationTime
 		return expression.Val1 * expression.Val2, nil
 	case "/":
 		if expression.Val2 == 0 {
-			return 0, errors.New("cannot divide by zero")
+			return 0, errors.New("нельзя делить на ноль")
 		}
 		<-time.After(timeouts.TimeCalculateDivide)
 		return expression.Val1 / expression.Val2, nil
 	default:
-		err = errors.New("not allowed action")
+		err = errors.New("недопустимое действиенедопустимое действие")
 		return 0, err
 	}
 }
