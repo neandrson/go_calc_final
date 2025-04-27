@@ -3,7 +3,6 @@ package grpcapp
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net"
 
@@ -110,7 +109,7 @@ func (a *App) Run() error {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	a.log.Info("grpc server started", slog.String("addr", l.Addr().String()))
+	a.log.Info("сервер grpc запущен", slog.String("addr", l.Addr().String()))
 
 	if err := a.gRPCServer.Serve(l); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
@@ -124,14 +123,14 @@ func (a *App) Stop() {
 	const op = "grpcapp.Stop"
 
 	a.log.With(slog.String("op", op)).
-		Info("stopping gRPC server", slog.Int("port", a.port))
+		Info("остановка сервера gRPC", slog.Int("port", a.port))
 
 	a.gRPCServer.GracefulStop()
 }
 
 func checkGrpcNameForJWT(ctx context.Context, callMeta interceptors.CallMeta) bool {
 	fullMethName := callMeta.FullMethod()
-	log.Printf(fullMethName)
+	//log.Printf(fullMethName)
 	for _, name := range listOfRoutesJWTMiddleware {
 		if name == fullMethName {
 			return true
