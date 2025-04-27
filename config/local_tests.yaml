@@ -18,6 +18,6 @@ http:
 postgres:
   host: postgres-for-test-integration
   port: 5432
-  db_name: testttdb
-  user: testttuser
-  password: testttpass
+  db_name: postgres
+  user: postgres
+  password: 123QWEasd
