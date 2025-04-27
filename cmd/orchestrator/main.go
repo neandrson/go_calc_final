@@ -45,43 +45,43 @@ func Start() {
 
 	expressionRepo, err := expression.NewPostgresRepository(dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to connect postgres: %v", err)
+		log.Fatalf("Не удалось подключиться к postgres: %v", err)
 		return
 	}
 	subExpressionRepo, err := subExpression.NewPostgresRepository(dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to connect postgres: %v", err)
+		log.Fatalf("Не удалось подключиться к postgres: %v", err)
 		return
 	}
 	agentRepo, err := agent.NewPostgresRepository(dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to connect agent postgres: %v", err)
+		log.Fatalf("Не удалось подключиться к агенту postgres: %v", err)
 		return
 	}
 
 	expressionsQueueRepo, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithTasks)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 	calculationsQueueRepository, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithFinishedTasks)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 	heartbeatsQueueRepository, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithHeartbeats)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 	rpcQueueRepository, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithRPC)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 	userRepository, err := user.NewPostgresRepository(dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 	appRepository, err := appRepo.NewPostgresRepository(dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 	}
 
 	ctx := context.Background()
@@ -106,7 +106,7 @@ func Start() {
 	<-stop
 
 	application.GRPCServer.Stop()
-	log.Info("Gracefully stopped")
+	log.Info("Остановлен")
 
 }
 
