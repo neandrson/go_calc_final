@@ -61,9 +61,9 @@ func New(log *slog.Logger,
 
 	recoveryOpts := []recovery.Option{
 		recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-			log.Error("Recovered from panic", slog.Any("panic", p))
+			log.Error("Возвращение паники", slog.Any("panic", p))
 
-			return status.Errorf(codes.Internal, "internal error")
+			return status.Errorf(codes.Internal, "внутренняя ошибка")
 		}),
 	}
 
