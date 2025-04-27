@@ -37,7 +37,7 @@ type Auth struct {
 }
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidCredentials = errors.New("недействительные учетные данные")
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=URLSaver
@@ -86,39 +86,39 @@ func (a *Auth) Login(
 		slog.String("username", login),
 	)
 
-	log.Info("attempting to login user")
+	log.Info("попытка входа пользователя")
 
 	user, err := a.usrProvider.Get(ctx, login)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			a.log.Warn("user not found", sl.Err(err))
+			a.log.Warn("пользователь не найден", sl.Err(err))
 
 			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
-		a.log.Error("failed to get user", sl.Err(err))
+		a.log.Error("пользователь не доступен", sl.Err(err))
 
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
-		a.log.Info("invalid credentials", sl.Err(err))
+		a.log.Info("недействительные учетные данные", sl.Err(err))
 
 		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
 	app, err := a.appProvider.App(ctx, appID)
 	if err != nil {
-		a.log.Info("failed to get app", sl.Err(err))
+		a.log.Info("приложение не доступно", sl.Err(err))
 
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Info("user logged in successfully")
+	log.Info("пользователь успешно вошел в систему")
 
 	token, err := jwt.NewToken(user, app, a.tokenTTL)
 	if err != nil {
-		a.log.Error("failed to generate token", sl.Err(err))
+		a.log.Error("не удалось сгенерировать токен", sl.Err(err))
 
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
@@ -136,18 +136,18 @@ func (a *Auth) RegisterNewUser(ctx context.Context, login string, pass string) (
 		slog.String("login", login),
 	)
 
-	log.Info("registering user")
+	log.Info("пользователь зарегистриарован")
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
-		log.Error("failed to generate password hash", sl.Err(err))
+		log.Error("не удалось сгенерировать хэш пароля", sl.Err(err))
 
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	id, err := a.usrSaver.Create(ctx, login, passHash)
 	if err != nil {
-		log.Error("failed to save user", sl.Err(err))
+		log.Error("не удалось сохранить пользователя", sl.Err(err))
 
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
