@@ -3,12 +3,13 @@ package gRPCorchestrator
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type exprRes struct {
@@ -44,16 +45,16 @@ func TestMain(m *testing.M) {
 	for {
 		countTries++
 		if countTries == CountTryReconnect {
-			fmt.Println("gRPC-Server is unreachable ")
+			fmt.Println("gRPC-Server недоступен")
 			break
 		}
 		resp, err := healthClient.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{})
 		if err == nil && resp.Status == grpc_health_v1.HealthCheckResponse_SERVING {
-			fmt.Println("gRPC-Server is healthy")
+			fmt.Println("gRPC-Server исправен")
 			break
 		}
 
-		fmt.Printf("Try to connect grpc-Server...\n")
+		fmt.Printf("Попытка подключения к grpc-Server...\n")
 		time.Sleep(delay)
 		delay *= ReconnectBackoff
 		if delay > MaxReconnectDelay {
