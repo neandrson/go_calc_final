@@ -46,13 +46,13 @@ func (a *Agent) Start() {
 	// соединение с очередью subexpressions
 	err := a.expressionQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v", err)
 	}
 	defer a.expressionQueueRepository.Close()
 
 	tasks, err := a.expressionQueueRepository.Consume()
 	if err != nil {
-		log.Fatalf("Failed to consume tasks from queue: %v", err)
+		log.Fatalf("Не удалось использовать задачи из очереди: %v", err)
 	}
 
 	// начинаем посылать heartbeats
@@ -71,15 +71,15 @@ func (a *Agent) Start() {
 		}
 		err := a.rpcQueueRepository.Connect()
 		if err != nil {
-			log.Printf("error connect to rpc queue")
+			log.Printf("ошибка подключения к очереди rpc")
 		}
 		rpcJson, err := json.Marshal(rpcAnswer)
 		if err != nil {
-			log.Printf("error unmarshal rpc")
+			log.Printf("ошибка unmarshal rpc")
 		}
 		err = a.rpcQueueRepository.Publish(rpcJson)
 		if err != nil {
-			log.Printf("error publish rpc")
+			log.Printf("ошибка публикации rpc")
 		}
 		a.rpcQueueRepository.Close()
 
@@ -97,14 +97,14 @@ func (a *Agent) CalculateExpression(task *models.SubExpression) {
 
 	err = a.calculationQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v", err)
 	}
 	defer a.calculationQueueRepository.Close()
 
-	expressionJson, err := json.Marshal(task)
+	expressionJson, _ := json.Marshal(task)
 	err = a.calculationQueueRepository.Publish(expressionJson)
 	if err != nil {
-		log.Printf("Failed to publish finished task to queue: %v", err)
+		log.Printf("Не удалось опубликовать выполненную задачу в очереди: %v", err)
 	}
 }
 
@@ -112,7 +112,7 @@ func (a *Agent) StartHeartbeats() {
 	// Открываем соединение один раз, а не на каждую итерацию
 	err := a.heartbeatQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v\n", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v\n", err)
 	}
 	defer a.heartbeatQueueRepository.Close() // Закрыть соединение при завершении функции
 
@@ -125,13 +125,13 @@ func (a *Agent) StartHeartbeats() {
 		}
 		agentJson, err := json.Marshal(agent)
 		if err != nil {
-			log.Printf("Failed to encode agent: %v\n", err)
+			log.Printf("Не удалось закодировать агента: %v\n", err)
 			continue // Продолжить цикл, если кодирование не удалось
 		}
 
 		err = a.heartbeatQueueRepository.Publish(agentJson)
 		if err != nil {
-			log.Printf("Failed to publish task to queue: %v", err)
+			log.Printf("Не удалось опубликовать задачу в очереди: %v", err)
 		}
 	}
 }
