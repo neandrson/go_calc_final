@@ -2,9 +2,10 @@ package queue
 
 import (
 	"fmt"
-	"github.com/streadway/amqp"
 	"log"
 	"time"
+
+	"github.com/streadway/amqp"
 )
 
 var countOfReconnects = 10
@@ -37,7 +38,7 @@ func NewRabbitMQRepository(url, queueName string) (*RabbitMQRepository, error) {
 		count++
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к RabbitMQ: %w", err)
 	}
 	repo.NotifyClose()
 	return repo, nil
@@ -47,13 +48,13 @@ func (r *RabbitMQRepository) Connect() error {
 	var err error
 	r.conn, err = amqp.Dial(r.url)
 	if err != nil {
-		return fmt.Errorf("failed to connect to RabbitMQ: %w", err)
+		return fmt.Errorf("не удалось подключиться к RabbitMQ: %w", err)
 	}
 
 	r.channel, err = r.conn.Channel()
 	if err != nil {
 		r.conn.Close() // Закрываем соединение, если канал не открылся
-		return fmt.Errorf("failed to open a channel: %w", err)
+		return fmt.Errorf("не удалось открыть канал: %w", err)
 	}
 
 	r.queue, err = r.channel.QueueDeclare(
@@ -67,7 +68,7 @@ func (r *RabbitMQRepository) Connect() error {
 	if err != nil {
 		r.channel.Close() // Закрываем канал, если очередь не объявлена
 		r.conn.Close()
-		return fmt.Errorf("failed to declare a queue: %w", err)
+		return fmt.Errorf("не удалось объявить очередь: %w", err)
 	}
 
 	return nil
@@ -92,7 +93,7 @@ func (r *RabbitMQRepository) Close() error {
 func (r *RabbitMQRepository) Publish(task []byte) error {
 	select {
 	case err := <-r.closeCh:
-		return fmt.Errorf("publish failed: %w", err)
+		return fmt.Errorf("опубликовать не удалось: %w", err)
 	default:
 		err := r.channel.Publish(
 			"",           // exchange
@@ -163,7 +164,7 @@ func (r *RabbitMQRepository) NotifyClose() {
 // handleClose - метод для обработки событий закрытия соединения и канала.
 func (r *RabbitMQRepository) handleClose(err *amqp.Error) {
 	if err != nil {
-		fmt.Printf("Connection closed: %v\n", err)
+		fmt.Printf("Соединение закрыто: %v\n", err)
 	}
 	r.Reconnect()
 }
@@ -174,11 +175,11 @@ func (r *RabbitMQRepository) Reconnect() {
 	for {
 		err := r.Connect()
 		if err == nil {
-			log.Printf("Successfully reconnect")
+			log.Printf("Переподключение успешно")
 			r.NotifyClose()
 			return
 		}
-		log.Printf("Failed to reconnect: %v, retrying in %v\n", err, delay)
+		log.Printf("Не удалось повторно подключиться: %v, повторная попытка через %v\n", err, delay)
 		time.Sleep(delay)
 		delay *= ReconnectBackoff
 		if delay > MaxReconnectDelay {
