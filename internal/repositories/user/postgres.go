@@ -19,13 +19,13 @@ type PostgresRepository struct {
 func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 	db, err := sql.Open("pgx", dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
 	// Check the connection
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("не удалось выполнить пинг базы данных: %w", err)
 	}
 
 	return &PostgresRepository{db}, nil
@@ -40,7 +40,7 @@ func (p *PostgresRepository) Create(ctx context.Context, login string, passHash 
 		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
 			return 0, fmt.Errorf("%s: %w", op, repositories.ErrUserExists)
 		}
-		return 0, fmt.Errorf("create user failure %e", err)
+		return 0, fmt.Errorf("неудалось создать пользователя %e", err)
 	}
 	return lastInsertId, nil
 }
