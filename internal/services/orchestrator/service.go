@@ -74,7 +74,12 @@ func NewOrchestrator(ctx context.Context, expressionRepo expression.Repository,
 	return orch
 }
 
-func (o *Orchestrator) CreateExpression(ctx context.Context, expression, idempotencyKey, userId string) (error, string) {
+func (o *Orchestrator) CreateExpression(
+	ctx context.Context,
+	expression,
+	idempotencyKey,
+	userId string,
+) (error, string) {
 	createdExpression, err := o.expressionRepository.CreateExpression(ctx, expression, idempotencyKey, userId)
 	if err != nil {
 		return err, ""
@@ -84,7 +89,7 @@ func (o *Orchestrator) CreateExpression(ctx context.Context, expression, idempot
 		exprId, _ := uuid.Parse(createdExpression.Id)
 		o.subExpressionRepository.DeleteSubExpressionsByExpressionId(ctx, exprId)
 		o.expressionRepository.DeleteExpressionById(ctx, exprId)
-		return fmt.Errorf("error split to subtasks: %e", err), ""
+		return fmt.Errorf("ошибка разделена на подзадачи: %e", err), ""
 	}
 	return nil, createdExpression.Id
 }
@@ -112,19 +117,19 @@ func (o *Orchestrator) UpdateExpressionState(ctx context.Context, key string, st
 func (o *Orchestrator) ReceiveHeartbeats() {
 	err := o.heartbeatsQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v", err)
 	}
 	defer o.heartbeatsQueueRepository.Close()
 
 	heartbeats, err := o.heartbeatsQueueRepository.Consume()
 	if err != nil {
-		log.Printf("Failed to consume tasks from queue: %v", err)
+		log.Printf("Не удалось использовать задачи из очереди: %v", err)
 	}
 	for heartbeat := range heartbeats {
 		agent := models.Agent{}
 		err = json.Unmarshal(heartbeat, &agent)
 		if err != nil {
-			log.Printf("Failed to decode agent: %v", err)
+			log.Printf("Не удалось декодировать агента: %v", err)
 			continue
 		}
 		o.CreateAgentIfNotExists(agent.Id)
@@ -134,43 +139,43 @@ func (o *Orchestrator) ReceiveHeartbeats() {
 func (o *Orchestrator) ReceiveCalculations(ctx context.Context) {
 	err := o.calculationsQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v", err)
 	}
 	defer o.calculationsQueueRepository.Close()
 
 	finishedTasks, err := o.calculationsQueueRepository.Consume()
 	if err != nil {
-		log.Printf("Failed to consume tasks from queue: %v", err)
+		log.Printf("Не удалось использовать задачи из очереди: %v", err)
 	}
 	for task := range finishedTasks {
 		expressionStruct := &models.SubExpression{}
 		err = json.Unmarshal(task, expressionStruct)
 		if err != nil {
-			log.Printf("error unmarshal subexpression: %e", err)
+			log.Printf("ошибка unmarshal подвыражение: %e", err)
 		}
 		if expressionStruct.Error {
 			err = o.subExpressionRepository.DeleteSubExpressionsByExpressionId(ctx, expressionStruct.ExpressionId)
 			if err != nil {
-				log.Printf("error delete subexpressions: %e", err)
+				log.Printf("ошибка удаления подвыражений: %e", err)
 			}
 			err = o.expressionRepository.UpdateState(ctx, expressionStruct.ExpressionId.String(), models.ExpressionError)
 			if err != nil {
-				log.Printf("error update state: %e", err)
+				log.Printf("ошибка обновления состояния: %e", err)
 			}
 			continue
 		}
 		err = o.subExpressionRepository.UpdateSubExpressions(ctx, expressionStruct)
 		if err != nil {
-			log.Printf("error update subexpression: %e", err)
+			log.Printf("ошибка обновления подвыражения: %e", err)
 		}
 		if expressionStruct.IsLast {
 			err = o.expressionRepository.UpdateExpressionById(ctx, expressionStruct.ExpressionId, expressionStruct.Result)
 			if err != nil {
-				log.Printf("error update expression: %e", err)
+				log.Printf("ошибка обновления выражения: %e", err)
 			}
 			err = o.subExpressionRepository.DeleteSubExpressionsByExpressionId(ctx, expressionStruct.ExpressionId)
 			if err != nil {
-				log.Printf("error delete subexpressions: %e", err)
+				log.Printf("ошибка удаления подвыражений: %e", err)
 			}
 		}
 	}
@@ -205,19 +210,19 @@ func (o *Orchestrator) SendSubExpression() {
 func (o *Orchestrator) ReceiveRPCTasks(ctx context.Context) {
 	err := o.rpcQueueRepository.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to queue: %v", err)
+		log.Fatalf("Не удалось подключиться к очереди: %v", err)
 	}
 	defer o.rpcQueueRepository.Close()
 
 	rpcTasks, err := o.rpcQueueRepository.Consume()
 	if err != nil {
-		log.Printf("Failed to consume tasks from queue: %v", err)
+		log.Printf("Не удалось использовать задачи из очереди: %v", err)
 	}
 	for rpc := range rpcTasks {
 		rpcAnswer := models.RPCAnswer{}
 		err = json.Unmarshal(rpc, &rpcAnswer)
 		if err != nil {
-			log.Printf("Failed to decode rpc answer: %v", err)
+			log.Printf("Не удалось декодировать ответ rpc: %v", err)
 			continue
 		}
 		o.subExpressionRepository.UpdateSubExpressionAgent(ctx, rpcAnswer.IdSubExpression, rpcAnswer.IdAgent)
@@ -236,7 +241,7 @@ func (o *Orchestrator) RetrySubExpressions(ctx context.Context) {
 				// получаем все невыполненные subexpression этого агента
 				tempExpressions, err := o.subExpressionRepository.GetNotCalculatedSubExpressionsByAgentId(ctx, agentId)
 				if err != nil {
-					log.Printf("err get sub expressions by agent id %e", err)
+					log.Printf("ошибка получения подвыражения по идентификатору агента id %e", err)
 					continue
 				}
 				for _, expr := range tempExpressions {
@@ -244,19 +249,19 @@ func (o *Orchestrator) RetrySubExpressions(ctx context.Context) {
 					// удаляем subexpression
 					err = o.subExpressionRepository.DeleteSubExpressionById(ctx, expr.Id)
 					if err != nil {
-						log.Printf("err delete sub expressions by agent id %e", err)
+						log.Printf("ошибка удаления подвыражений по идентификатору агента id %e", err)
 						continue
 					}
 					// создаем новый
 					newExpr, err := o.subExpressionRepository.CreateSubExpression(ctx, expr)
 					if err != nil {
-						log.Printf("error create sub expressions %e", err)
+						log.Printf("ошибка создания подвыражений %e", err)
 						continue
 					}
 					// меняем у зависимых от удаленного выражения sub_expression на новый
 					err = o.subExpressionRepository.ReplaceExpressionsIds(ctx, oldId, newExpr.Id)
 					if err != nil {
-						log.Printf("err delete sub expressions by agent id %e", err)
+						log.Printf("ошибка удаления подвыражения агентом id %e", err)
 						continue
 					}
 				}
