@@ -2,12 +2,10 @@ package config
 
 import (
 	"flag"
-	"log"
 	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -80,11 +78,11 @@ func MustLoadPath(configPath string) *Config {
 // Priority: flag > env > default.
 // Default value is empty string.
 func fetchConfigPath() string {
-	err := godotenv.Load()
+	//err := godotenv.Load()
 
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	//if err != nil {
+	//	log.Fatalf("Error loading .env file")
+	//}
 	var res string
 
 	flag.StringVar(&res, "config", "", "path to config file")
