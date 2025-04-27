@@ -23,13 +23,13 @@ type PostgresRepository struct {
 func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 	db, err := sql.Open("pgx", dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
 	// Check the connection
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("не удалось выполнить пинг базы данных: %w", err)
 	}
 
 	listener := pq.NewListener(dataSourceName, 1*time.Second, 5*time.Second, func(ev pq.ListenerEventType, err error) {
@@ -42,7 +42,7 @@ func NewPostgresRepository(dataSourceName string) (*PostgresRepository, error) {
 	err = listener.Listen("sub_expressions_channel")
 	if err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to init listener: %w", err)
+		return nil, fmt.Errorf("не удалось инициализировать прослушиватель: %w", err)
 	}
 
 	// Запускаем горутину для обработки уведомлений
@@ -61,7 +61,7 @@ func (r *PostgresRepository) CreateSubExpression(ctx context.Context, subExpress
 		subExpression.ExpressionId, subExpression.Val1, subExpression.Val2, subExpression.SubExpressionId1, subExpression.SubExpressionId2, subExpression.IsLast, subExpression.Action, subExpression.Error).Scan(&id)
 
 	if err != nil {
-		return nil, fmt.Errorf("create expression failure %e", err)
+		return nil, fmt.Errorf("создание выражения неудачно %e", err)
 	}
 
 	subExpression.Id = id
@@ -81,12 +81,12 @@ func (r *PostgresRepository) handleNotification(ctx context.Context, notificatio
 			var se *models.SubExpression
 			err := json.Unmarshal([]byte(notification.Extra), &se)
 			if err != nil {
-				log.Printf("Failed to parse JSON: %v", err)
+				log.Printf("Не удалось проанализировать JSON: %v", err)
 				continue
 			}
 			newse, err := r.GetExpressionByKey(ctx, se.Id.String())
 			if err != nil {
-				log.Printf("Failed to get expr by key: %s %v %e", se.Id.String(), se, err)
+				log.Printf("Не удалось получить выражение по ключу: %s %v %e", se.Id.String(), se, err)
 				continue
 			}
 			listener <- newse
