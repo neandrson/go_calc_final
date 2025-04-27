@@ -9,7 +9,7 @@ import (
 func ValidateExpression(expression string) bool {
 	_, err := parser.ParseExpr(expression)
 	if err != nil {
-		log.Printf("parse error")
+		log.Printf("ошибка синтаксического анализа")
 		return false
 	}
 	return true
