@@ -73,7 +73,7 @@ services:
       RABBITMQ_VHOST: '/'
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
-      DATABASE_URL: postgres://postgres:123QWEasd@localhost:5672/postgres?sslmode=disable
+      DATABASE_URL: postgres://postgres:123QWEasd@localhost:5432/postgres?sslmode=disable
       CONFIG_PATH: ${CONFIG_PATH}
     volumes:
       - './:/agent'
