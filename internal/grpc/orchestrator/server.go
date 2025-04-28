@@ -33,15 +33,15 @@ func (s *serverAPI) CreateExpression(
 ) (*orchv1.CreateExpressionResponse, error) {
 	if in.Expression == "" {
 
-		return nil, status.Error(codes.InvalidArgument, "expression is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется выражение")
 	}
 	if in.IdempotencyKey == "" {
 
-		return nil, status.Error(codes.InvalidArgument, "idempotencyKey is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется ключ idempotency")
 	}
 
 	if !orchestratorutils.ValidateExpression(in.Expression) {
-		return nil, status.Error(codes.InvalidArgument, "invalid expression")
+		return nil, status.Error(codes.InvalidArgument, "недопустимое выражение")
 	}
 	userID := ctx.Value("userID").(float64)
 	userIdStr := strconv.Itoa(int(userID))
@@ -50,14 +50,14 @@ func (s *serverAPI) CreateExpression(
 	if expressionByKey != nil {
 		if err != nil {
 			log.Error(err)
-			return nil, status.Error(codes.Internal, "failed to create expression")
+			return nil, status.Error(codes.Internal, "не удалось создать выражение")
 		}
 		expressionId = expressionByKey.Id
 	} else {
 		err, expressionId = s.orchestrator.CreateExpression(ctx, in.Expression, in.IdempotencyKey, userIdStr)
 		if err != nil {
 			log.Error(err)
-			return nil, status.Error(codes.Internal, "failed to create expression")
+			return nil, status.Error(codes.Internal, "не удалось создать выражение")
 		}
 	}
 	return &orchv1.CreateExpressionResponse{ExpressionId: expressionId}, nil
@@ -69,7 +69,7 @@ func (s *serverAPI) GetExpression(
 ) (*orchv1.GetExpressionResponse, error) {
 	if in.ExpressionId == "" {
 
-		return nil, status.Error(codes.InvalidArgument, "expressionId is required")
+		return nil, status.Error(codes.InvalidArgument, "expressionId обязателен")
 	}
 
 	userID := ctx.Value("userID").(float64)
@@ -77,10 +77,10 @@ func (s *serverAPI) GetExpression(
 	expression, err := s.orchestrator.GetExpression(ctx, in.ExpressionId, userIdStr)
 	if err != nil {
 		if errors.Is(err, repositories.ErrExpressionNotFound) {
-			return nil, status.Error(codes.NotFound, "expression not found")
+			return nil, status.Error(codes.NotFound, "expression не найден")
 		}
 		log.Error(err)
-		return nil, status.Error(codes.Internal, "failed to get expression")
+		return nil, status.Error(codes.Internal, "не удалось получить выражение")
 	}
 
 	return s.ExpressionModelToGetExpressionResponse(expression), nil
@@ -106,7 +106,7 @@ func (s *serverAPI) GetExpressions(
 	expressions, err := s.orchestrator.GetExpressions(ctx, userIdStr)
 	if err != nil {
 		log.Error(err)
-		return nil, status.Error(codes.Internal, "failed to get expressions")
+		return nil, status.Error(codes.Internal, "не удалось получить выражение")
 	}
 	var listOfExpression []*orchv1.GetExpressionResponse
 	for _, expression := range expressions {
@@ -121,7 +121,7 @@ func (s *serverAPI) GetAgents(
 ) (*orchv1.GetAgentsResponse, error) {
 	agents, err := s.orchestrator.GetAgents()
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to get agents")
+		return nil, status.Error(codes.Internal, "не удалось получить агентов")
 	}
 	var listOfAgents []*orchv1.GetAgentResponse
 	for _, agent := range agents {
