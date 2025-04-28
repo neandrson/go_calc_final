@@ -7,7 +7,7 @@ import (
 	"github.com/neandrson/go_calc_final/internal/models"
 )
 
-// GetOperators возвращает список операция
+// GetOperators возвращает список операций
 func GetOperators(timeouts config.CalculationTimeoutsConfig) []*models.Operator {
 	operatorsMap := map[string]time.Duration{
 		"+": timeouts.TimeCalculatePlus / time.Second,
