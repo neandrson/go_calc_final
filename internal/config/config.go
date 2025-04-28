@@ -55,7 +55,7 @@ type PostgresConfig struct {
 func MustLoad() *Config {
 	configPath := fetchConfigPath()
 	if configPath == "" {
-		panic("config path is empty")
+		panic("путь конфигурации пуст")
 	}
 
 	return MustLoadPath(configPath)
@@ -64,13 +64,13 @@ func MustLoad() *Config {
 func MustLoadPath(configPath string) *Config {
 	// check if file exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		panic("config file does not exist: " + configPath)
+		panic("файл конфигурации не существует: " + configPath)
 	}
 
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		panic("cannot read config: " + err.Error())
+		panic("не могу прочитать конфигурацию: " + err.Error())
 	}
 
 	return &cfg
@@ -83,11 +83,11 @@ func fetchConfigPath() string {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Ошибка загрузки файла .env")
 	}
 	var res string
 
-	flag.StringVar(&res, "config", "", "path to config file")
+	flag.StringVar(&res, "config", "", "путь к файлу конфигурации")
 	flag.Parse()
 
 	if res == "" {
