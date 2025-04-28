@@ -63,7 +63,7 @@ func (a *Agent) Start() {
 		expressionStruct := &models.SubExpression{}
 		_ = json.Unmarshal(task, expressionStruct)
 
-		// формирование ответа оркестратору и том, что взяли subexpression на обработку
+		// формирование ответа оркестратору в том, что взяли subexpression на обработку
 		idAgent, _ := uuid.Parse(a.id)
 		rpcAnswer := models.RPCAnswer{
 			IdSubExpression: expressionStruct.Id,
