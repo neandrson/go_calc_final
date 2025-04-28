@@ -106,7 +106,7 @@ func Start() {
 	<-stop
 
 	application.GRPCServer.Stop()
-	log.Info("Остановлен")
+	log.Info("Сервер остановлен")
 
 }
 
