@@ -26,24 +26,24 @@ func (s *serverAPI) Login(
 	in *authv1.LoginRequest,
 ) (*authv1.LoginResponse, error) {
 	if in.Login == "" {
-		return nil, status.Error(codes.InvalidArgument, "login is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется вход")
 	}
 
 	if in.Password == "" {
-		return nil, status.Error(codes.InvalidArgument, "password is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется пароль")
 	}
 
 	if in.GetAppId() == 0 {
-		return nil, status.Error(codes.InvalidArgument, "app_id is required")
+		return nil, status.Error(codes.InvalidArgument, "app_id обязателен")
 	}
 
 	token, err := s.auth.Login(ctx, in.GetLogin(), in.GetPassword(), int(in.GetAppId()))
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			return nil, status.Error(codes.InvalidArgument, "invalid login or password")
+			return nil, status.Error(codes.InvalidArgument, "неверный логин или пароль")
 		}
 
-		return nil, status.Error(codes.Internal, "failed to login")
+		return nil, status.Error(codes.Internal, "не удалось войти")
 	}
 	return &authv1.LoginResponse{Token: token}, nil
 }
@@ -53,20 +53,20 @@ func (s *serverAPI) Register(
 	in *authv1.RegisterRequest,
 ) (*authv1.RegisterResponse, error) {
 	if in.Login == "" {
-		return nil, status.Error(codes.InvalidArgument, "login is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется вход")
 	}
 
 	if in.Password == "" {
-		return nil, status.Error(codes.InvalidArgument, "password is required")
+		return nil, status.Error(codes.InvalidArgument, "требуется пароль")
 	}
 
 	uid, err := s.auth.RegisterNewUser(ctx, in.GetLogin(), in.GetPassword())
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserExists) {
-			return nil, status.Error(codes.AlreadyExists, "user already exists")
+			return nil, status.Error(codes.AlreadyExists, "пользователь уже существует")
 		}
 
-		return nil, status.Error(codes.Internal, "failed to register user")
+		return nil, status.Error(codes.Internal, "не удалось зарегистрировать пользователя")
 	}
 
 	return &authv1.RegisterResponse{UserId: uid}, nil
