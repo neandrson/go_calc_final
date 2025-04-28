@@ -44,7 +44,6 @@ func Start() {
 	log.Printf(dataSourceName)
 
 	expressionRepo, err := expression.NewPostgresRepository(dataSourceName)
-	fmt.Println(expressionRepo, err)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к postgres: %v", err)
 		return
