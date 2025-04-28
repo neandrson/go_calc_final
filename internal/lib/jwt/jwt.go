@@ -34,33 +34,33 @@ func ProcessJWT(ctx context.Context, tokenString string, appRepo app.Repository)
 	// Извлечение app_id из JWT без проверки подписи
 	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 	if err != nil {
-		return fmt.Errorf("failed to parse JWT: %w", err), nil
+		return fmt.Errorf("не удалось проанализировать JWT: %w", err), nil
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return fmt.Errorf("invalid JWT"), nil
+		return fmt.Errorf("неверный JWT"), nil
 	}
 
 	appID, ok := claims["app_id"].(float64)
 	if !ok {
-		return fmt.Errorf("app_id not found in JWT"), nil
+		return fmt.Errorf("app_id не найдено в JWT"), nil
 	}
 	app, err := appRepo.App(ctx, int(appID))
 	if err != nil {
-		return fmt.Errorf("failed to get app: %w", err), nil
+		return fmt.Errorf("не удалось получить приложение: %w", err), nil
 	}
 
 	// Проверка валидности JWT с использованием полученного секрета
 	_, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("неожиданный метод подписания: %v", token.Header["alg"])
 		}
 		return []byte(app.Secret), nil
 	})
 
 	if err != nil {
-		return fmt.Errorf("invalid JWT: %w", err), nil
+		return fmt.Errorf("неверный JWT: %w", err), nil
 	}
 	return nil, token
 }
