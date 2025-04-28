@@ -19,7 +19,7 @@ func (_m *Repository) App(ctx context.Context, appID int) (models.App, error) {
 	ret := _m.Called(ctx, appID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for App")
+		panic("для приложения не указано возвращаемое значение")
 	}
 
 	var r0 models.App
