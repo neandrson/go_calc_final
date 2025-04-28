@@ -29,23 +29,23 @@ func Start() {
 	cfg := config.MustLoad()
 	expressionsQueueRepo, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithTasks)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 		return
 	}
 
 	calculationQueueRepo, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithFinishedTasks)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 		return
 	}
 	heartbeatQueueRepo, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithHeartbeats)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 		return
 	}
 	rpcQueueRepo, err := queue.NewRabbitMQRepository(cfg.UrlRabbit, cfg.Queue.NameQueueWithRPC)
 	if err != nil {
-		log.Fatalf("Failed to start queue: %v", err)
+		log.Fatalf("Не удалось запустить очередь: %v", err)
 		return
 	}
 	a := agent.NewAgent(expressionsQueueRepo, calculationQueueRepo, heartbeatQueueRepo, rpcQueueRepo, cfg.CalculationTimeouts)
