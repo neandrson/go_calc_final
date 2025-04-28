@@ -16,12 +16,12 @@ func JWTMiddleware(appRepo app.Repository) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
+			return nil, status.Errorf(codes.Unauthenticated, "метаданные не предоставлены")
 		}
 
 		values := md["authorization"]
 		if len(values) == 0 {
-			return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+			return nil, status.Errorf(codes.Unauthenticated, "токен авторизации не предоставлен")
 		}
 
 		token := values[0]
@@ -32,7 +32,7 @@ func JWTMiddleware(appRepo app.Repository) grpc.UnaryServerInterceptor {
 		// Если токен недействителен, верните ошибку
 		err, jwtToken := jwt.ProcessJWT(ctx, token, appRepo)
 		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+			return nil, status.Errorf(codes.Unauthenticated, "недействительный токен")
 		}
 		if claims, ok := jwtToken.Claims.(gojwt.MapClaims); ok {
 			userId, ok := claims["uid"].(float64)
