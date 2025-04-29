@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-var ErrQueueNotConnected = errors.New("queue not connected")
+var ErrQueueNotConnected = errors.New("очередь не подключена")
 
 type Repository interface {
 	// Connect осуществляет соединение с очередью с именем queueName
